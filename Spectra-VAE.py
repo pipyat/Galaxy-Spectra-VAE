@@ -9,7 +9,6 @@ import tensorflow as tf
 
 tf.compat.v1.disable_eager_execution()
 
-
 #NEURAL NETWORK - VARIATIONAL AUTOENCODER
 
 K.clear_session()
@@ -17,24 +16,21 @@ K.clear_session()
 batch_size = 5
 original_dim = len(flux[0])
 samples = len(flux)
-intermediate_dim = 800
 latent_dim = 6
 std = epsilon_std =  1
 epochs = 20
 beta = 0
 
-
 flux_train = flux[:40000]
 flux_test = flux[40000:45000]
 
-
 x = Input(batch_shape =(None,original_dim,))
-dense = Dense(700, activation='elu')(x)
-dense2 = Dense(50, activation='elu')(dense)
+encoder_min = Dense(700, activation='elu')(x)
+encoder_out = Dense(50, activation='elu')(encoder_in)
 
 #PARAMETERS NEEDED TO SPECIFY MEAN AND STANDARD DEVIATION 
-z_mean = Dense(latent_dim)(dense2)
-z_log_sigma = Dense(latent_dim)(dense2)
+z_mean = Dense(latent_dim)(encoder_out)
+z_log_sigma = Dense(latent_dim)(encoder_out)
 
 #SAMPLING FROM DISTRIBUTION - USE REPARAMETERISATION TRICK
 def sampling(args):
@@ -47,15 +43,13 @@ z = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_log_sigma])
 
 
 #DECODER
-decoder_in =  Dense(50, activation='elu')
-decoder_mid = Dense(700, activation='elu')
-decoder_out = Dense(original_dim, activation='linear')
-decoded = decoder_in(z)
-decoded2 = decoder_mid(decoded)
-decoded_mean = decoder_out(decoded2)
+decoder_in =  Dense(50, activation='elu')(z)
+decoder_mid = Dense(700, activation='elu')(decoded)
+decoder_out = Dense(original_dim, activation='linear')(decoded2)
+
 
 #Full Model
-vae = Model(x, decoded_mean)
+vae = Model(x, decoded_out)
 #Encoder
 encoder = Model(x, z_mean)
 
